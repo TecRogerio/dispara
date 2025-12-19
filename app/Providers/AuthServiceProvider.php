@@ -25,6 +25,19 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // ✅ Gate para Admin (usado no middleware can:admin)
+        Gate::define('admin', function ($user) {
+            // Prioridade 1: coluna is_admin (int/bool)
+            if (isset($user->is_admin) && (int) $user->is_admin === 1) {
+                return true;
+            }
+
+            // Prioridade 2: coluna role = 'admin'
+            if (isset($user->role) && (string) $user->role === 'admin') {
+                return true;
+            }
+
+            return false;
+        });
     }
 }

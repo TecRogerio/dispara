@@ -1,130 +1,307 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" style="max-width: 980px; margin-top: 30px;">
-    <div style="background:#fff;border-radius:14px;padding:28px;box-shadow:0 6px 18px rgba(0,0,0,.06);">
 
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;">
-            <h2 style="margin:0;font-weight:700;">Minhas Instâncias (WhatsApp)</h2>
+<div class="panel-header">
+    <div>
+        <h1 class="panel-title">Minhas Instâncias (WhatsApp)</h1>
+        <p class="panel-subtitle">Gerencie as conexões da Evolution/WhatsApp e controle o envio diário.</p>
+    </div>
 
-            <a href="{{ route('instancias.create') }}" style="font-weight:600;">
-                + Nova instância
-            </a>
+    <a href="{{ route('instancias.create') }}" class="z-btn z-btn-primary">
+        + Nova instância
+    </a>
+</div>
+
+@if (session('success'))
+    <div class="z-card" style="margin-bottom:14px;">
+        <div class="z-card-body">
+            <div class="z-badge z-badge-ok">✅ {{ session('success') }}</div>
         </div>
+    </div>
+@endif
 
-        @if (session('success'))
-            <div style="margin-top:16px;padding:12px 14px;border-radius:10px;background:#e8fff1;border:1px solid #b8f1cc;color:#145a32;">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div style="margin-top:16px;padding:12px 14px;border-radius:10px;background:#ffecec;border:1px solid #ffbdbd;color:#7a1b1b;">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if (session('info'))
-            <div style="margin-top:16px;padding:12px 14px;border-radius:10px;background:#eef6ff;border:1px solid #b9dbff;color:#0b3a66;">
-                {{ session('info') }}
-            </div>
-        @endif
-
-        <div style="margin-top:18px;">
-            <table style="width:100%;border-collapse:collapse;">
-                <thead>
-                    <tr style="text-align:left;border-bottom:1px solid #eee;">
-                        <th style="padding:10px 8px;">Label</th>
-                        <th style="padding:10px 8px;">Instance</th>
-                        <th style="padding:10px 8px;">Ativa</th>
-                        <th style="padding:10px 8px;">Limite/dia</th>
-                        <th style="padding:10px 8px;">Status (Evo)</th>
-                        <th style="padding:10px 8px;">Ações</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                @forelse ($instances as $row)
-                    <tr style="border-bottom:1px solid #f2f2f2;">
-                        <td style="padding:12px 8px;">
-                            {{ $row->label ?? '-' }}
-                        </td>
-
-                        <td style="padding:12px 8px;">
-                            <strong>{{ $row->instance_name }}</strong>
-                        </td>
-
-                        <td style="padding:12px 8px;">
-                            @if ((bool)$row->enabled)
-                                <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:#e8fff1;border:1px solid #b8f1cc;color:#145a32;font-size:12px;">
-                                    SIM
-                                </span>
-                            @else
-                                <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:#fff3cd;border:1px solid #ffe69c;color:#6b4f00;font-size:12px;">
-                                    NÃO
-                                </span>
-                            @endif
-                        </td>
-
-                        <td style="padding:12px 8px;">
-                            {{ (int)($row->daily_limit ?? 200) }}
-                        </td>
-
-                        <td style="padding:12px 8px;">
-                            <span style="font-size:12px;color:#999;">-</span>
-                        </td>
-
-                        <td style="padding:12px 8px;">
-                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-
-                                {{-- Conectar (gera QR / inicia sessão na Evolution) --}}
-                                <form method="POST" action="{{ route('instancias.connect', $row->id) }}">
-                                    @csrf
-                                    <button type="submit"
-                                        style="padding:6px 10px;border-radius:8px;border:1px solid #cfe2ff;background:#e7f1ff;cursor:pointer;">
-                                        Conectar
-                                    </button>
-                                </form>
-
-                                {{-- Ativar/Desativar (enabled) --}}
-                                <form method="POST" action="{{ route('instancias.toggle', $row->id) }}">
-                                    @csrf
-                                    <button type="submit"
-                                        style="padding:6px 10px;border-radius:8px;border:1px solid #ddd;background:#f7f7f7;cursor:pointer;">
-                                        {{ ((bool)$row->enabled) ? 'Desativar' : 'Ativar' }}
-                                    </button>
-                                </form>
-
-                                {{-- Remover --}}
-                                <form method="POST" action="{{ route('instancias.destroy', $row->id) }}" onsubmit="return confirm('Remover esta instância?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        style="padding:6px 10px;border-radius:8px;border:1px solid #ffbdbd;background:#ffecec;cursor:pointer;">
-                                        Remover
-                                    </button>
-                                </form>
-
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" style="padding:16px 8px;color:#666;">
-                            Nenhuma instância cadastrada ainda. Clique em <strong>+ Nova instância</strong>.
-                        </td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
+@if (session('error'))
+    <div class="z-card" style="margin-bottom:14px;">
+        <div class="z-card-body">
+            <div class="z-badge z-badge-off">⛔ {{ session('error') }}</div>
         </div>
+    </div>
+@endif
 
-        @if (app()->environment('local'))
-            <div style="margin-top:18px;font-size:12px;color:#666;">
-                Debug local: <a href="{{ url('/evolution/ping') }}">/evolution/ping</a> · <a href="{{ url('/evolution/check') }}">/evolution/check</a>
-            </div>
-        @endif
+@if (session('info'))
+    <div class="z-card" style="margin-bottom:14px;">
+        <div class="z-card-body">
+            <div class="z-badge z-badge-warn">ℹ️ {{ session('info') }}</div>
+        </div>
+    </div>
+@endif
 
+<div class="z-card">
+    <div class="z-card-header">
+        <strong>Lista de Instâncias</strong>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <span style="font-size:12px;color:var(--muted);">Total: {{ $instances->count() }}</span>
+        </div>
+    </div>
+
+    <div class="z-card-body" style="padding:0;">
+        <table class="z-table">
+            <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Instance</th>
+                    <th>Ativa</th>
+                    <th>Limite/dia</th>
+                    <th>Status (Evo)</th>
+                    <th style="width: 380px;">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            @forelse ($instances as $row)
+                <tr data-instance-row
+                    data-status-url="{{ route('instancias.status', $row->id) }}"
+                    data-instance-id="{{ $row->id }}"
+                >
+                    <td>{{ $row->label ?? '-' }}</td>
+
+                    <td>
+                        <strong>{{ $row->instance_name }}</strong>
+                        <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+                            ID: {{ $row->id }}
+                        </div>
+                    </td>
+
+                    <td>
+                        @if ((bool)$row->enabled)
+                            <span class="z-badge z-badge-ok">SIM</span>
+                        @else
+                            <span class="z-badge z-badge-warn">NÃO</span>
+                        @endif
+                    </td>
+
+                    <td>{{ (int)($row->daily_limit ?? 200) }}</td>
+
+                    <td>
+                        <span id="evoStatusBadge-{{ $row->id }}" class="z-badge z-badge-warn" style="font-size:12px;">
+                            ⏳ Verificando...
+                        </span>
+                    </td>
+
+                    <td>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+
+                            {{-- Conectar --}}
+                            <form method="POST"
+                                  action="{{ route('instancias.connect', $row->id) }}"
+                                  id="connectForm-{{ $row->id }}">
+                                @csrf
+                                <button type="submit" class="z-btn z-btn-primary" id="connectBtn-{{ $row->id }}">
+                                    Conectar
+                                </button>
+                            </form>
+
+                            {{-- Desconectar --}}
+                            <form method="POST"
+                                  action="{{ route('instancias.disconnect', $row->id) }}"
+                                  id="disconnectForm-{{ $row->id }}"
+                                  style="display:none;"
+                                  onsubmit="return confirm('Desconectar esta instância da Evolution/WhatsApp?');">
+                                @csrf
+                                <button type="submit" class="z-btn z-btn-danger" id="disconnectBtn-{{ $row->id }}">
+                                    Desconectar
+                                </button>
+                            </form>
+
+                            {{-- Ativar/Desativar (enabled) --}}
+                            <form method="POST" action="{{ route('instancias.toggle', $row->id) }}">
+                                @csrf
+                                <button type="submit" class="z-btn">
+                                    {{ ((bool)$row->enabled) ? 'Desativar' : 'Ativar' }}
+                                </button>
+                            </form>
+
+                            {{-- Remover --}}
+                            <form method="POST"
+                                  action="{{ route('instancias.destroy', $row->id) }}"
+                                  onsubmit="return confirm('Remover esta instância do sistema?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="z-btn z-btn-danger">
+                                    Remover
+                                </button>
+                            </form>
+
+                        </div>
+
+                        <div id="rowHint-{{ $row->id }}" style="display:none;margin-top:8px;font-size:12px;color:var(--muted);">
+                            Aguarde...
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" style="padding:16px 12px;color:var(--muted);">
+                        Nenhuma instância cadastrada ainda. Clique em <strong>+ Nova instância</strong>.
+                    </td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
+
+@if (app()->environment('local'))
+    <div style="margin-top:14px;font-size:12px;color:var(--muted);">
+        Debug local:
+        <a class="link" href="{{ url('/evolution/ping') }}">/evolution/ping</a>
+        ·
+        <a class="link" href="{{ url('/evolution/check') }}">/evolution/check</a>
+    </div>
+@endif
+
+<script>
+(function () {
+    const rows = document.querySelectorAll('[data-instance-row]');
+    if (!rows.length) return;
+
+    let busy = false;
+
+    function withTimeout(ms, promise) {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), ms);
+        return Promise.race([
+            promise(controller.signal).finally(() => clearTimeout(t)),
+        ]);
+    }
+
+    function setBadge(badge, type, text) {
+        if (!badge) return;
+        badge.className = 'z-badge ' + (type === 'ok' ? 'z-badge-ok' : type === 'off' ? 'z-badge-off' : 'z-badge-warn');
+        badge.textContent = text;
+    }
+
+    function normalizeState(data) {
+        const raw = (data && data.state) ? String(data.state) : '';
+        return raw ? raw.toLowerCase() : '';
+    }
+
+    function setRowLoading(id, isLoading, msg) {
+        const hint = document.getElementById('rowHint-' + id);
+        if (!hint) return;
+
+        if (isLoading) {
+            hint.style.display = 'block';
+            hint.textContent = msg || 'Aguarde...';
+        } else {
+            hint.style.display = 'none';
+            hint.textContent = '';
+        }
+    }
+
+    function setButtonsLoading(id, isLoading) {
+        const connectBtn = document.getElementById('connectBtn-' + id);
+        const disconnectBtn = document.getElementById('disconnectBtn-' + id);
+
+        if (connectBtn) {
+            connectBtn.disabled = !!isLoading;
+            connectBtn.style.opacity = isLoading ? '0.7' : '1';
+            if (isLoading) connectBtn.textContent = 'Aguarde...';
+            else connectBtn.textContent = 'Conectar';
+        }
+
+        if (disconnectBtn) {
+            disconnectBtn.disabled = !!isLoading;
+            disconnectBtn.style.opacity = isLoading ? '0.7' : '1';
+            if (isLoading) disconnectBtn.textContent = 'Aguarde...';
+            else disconnectBtn.textContent = 'Desconectar';
+        }
+    }
+
+    async function updateRow(row) {
+        const id = row.getAttribute('data-instance-id');
+        const url = row.getAttribute('data-status-url');
+
+        const badge = document.getElementById('evoStatusBadge-' + id);
+        const connectForm = document.getElementById('connectForm-' + id);
+        const disconnectForm = document.getElementById('disconnectForm-' + id);
+
+        if (!id || !url) return;
+
+        try {
+            const data = await withTimeout(6000, (signal) =>
+                fetch(url, { headers: { 'Accept': 'application/json' }, cache: 'no-store', signal })
+                    .then(r => r.json())
+            );
+
+            const state = normalizeState(data);
+            const connected = (data && data.connected === true) || state === 'open';
+
+            if (connected) {
+                setBadge(badge, 'ok', '✅ Conectado');
+                if (connectForm) connectForm.style.display = 'none';
+                if (disconnectForm) disconnectForm.style.display = 'inline-block';
+            } else if (state) {
+                // estados típicos: close/connecting/qr/etc
+                setBadge(badge, 'warn', '⏳ ' + state);
+                if (connectForm) connectForm.style.display = 'inline-block';
+                if (disconnectForm) disconnectForm.style.display = 'none';
+            } else {
+                setBadge(badge, 'warn', '⚠️ Indisponível');
+                if (connectForm) connectForm.style.display = 'inline-block';
+                if (disconnectForm) disconnectForm.style.display = 'none';
+            }
+
+        } catch (e) {
+            setBadge(badge, 'warn', '⚠️ Indisponível');
+            if (connectForm) connectForm.style.display = 'inline-block';
+            if (disconnectForm) disconnectForm.style.display = 'none';
+        }
+    }
+
+    async function tick() {
+        if (busy) return;
+        busy = true;
+
+        try {
+            await Promise.all(Array.from(rows).map(row => updateRow(row)));
+        } finally {
+            busy = false;
+        }
+    }
+
+    // UX: ao clicar desconectar, trava botões e força refresh do status logo em seguida
+    rows.forEach(row => {
+        const id = row.getAttribute('data-instance-id');
+        const disconnectForm = document.getElementById('disconnectForm-' + id);
+        const connectForm = document.getElementById('connectForm-' + id);
+
+        if (disconnectForm) {
+            disconnectForm.addEventListener('submit', () => {
+                setRowLoading(id, true, 'Solicitando desconexão na Evolution...');
+                setButtonsLoading(id, true);
+                // quando voltar do POST, a página recarrega com flash message.
+                // mas se o navegador não recarregar por algum motivo, a gente faz refresh do status depois.
+                setTimeout(() => tick(), 2500);
+                setTimeout(() => { setRowLoading(id, false); setButtonsLoading(id, false); }, 8000);
+            });
+        }
+
+        if (connectForm) {
+            connectForm.addEventListener('submit', () => {
+                setRowLoading(id, true, 'Abrindo QR Code...');
+                setButtonsLoading(id, true);
+            });
+        }
+    });
+
+    // primeira verificação rápida
+    tick();
+
+    // atualiza a cada 5s (sem empilhar requisições)
+    setInterval(tick, 5000);
+})();
+</script>
+
 @endsection

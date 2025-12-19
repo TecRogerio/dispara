@@ -55,17 +55,37 @@ class Settings
         return $val;
     }
 
-    public static function int(string $key, int $default): int
-    {
-        $v = self::get($key, $default);
+   public static function int(string $key, int|string $default = 0): int
+{
+    // garante que default sempre vira int, mesmo se vier '20'
+    $default = (int) $default;
 
-        // aceita "12", 12, "12.0"
-        if (is_numeric($v)) {
-            return (int) $v;
-        }
+    $ck = "int:{$key}";
 
+    if (isset(self::$cache[$ck])) {
+        return (int) self::$cache[$ck];
+    }
+
+    try {
+        $val = \DB::table('settings')
+            ->where('key', $key)
+            ->value('value');
+    } catch (\Throwable $e) {
+        $val = null;
+    }
+
+    if ($val === null || $val === '') {
+        self::$cache[$ck] = $default;
         return $default;
     }
+
+    // se vier string numérica do banco, converte
+    $valInt = (int) $val;
+
+    self::$cache[$ck] = $valInt;
+    return $valInt;
+}
+
 
     public static function bool(string $key, bool $default): bool
     {

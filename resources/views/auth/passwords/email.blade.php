@@ -1,47 +1,31 @@
-@extends('layouts.app')
+@extends('layouts.auth')
+
+@section('title', 'Recuperar senha')
+@section('subtitle', 'Informe seu e-mail e enviaremos um link para redefinir sua senha.')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
+    <h2 class="title">Recuperar senha</h2>
+    <p class="desc">Digite o e-mail cadastrado para receber o link de redefinição.</p>
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+    @if (session('status'))
+        <div class="success">{{ session('status') }}</div>
+    @endif
 
-                    <form method="POST" action="{{ route('password.email') }}">
-                        @csrf
+    <form method="POST" action="{{ route('password.email') }}">
+        @csrf
 
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Send Password Reset Link') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div class="field">
+            <label for="email">E-mail</label>
+            <input id="email" type="email" name="email"
+                   class="input @error('email') invalid @enderror"
+                   value="{{ old('email') }}" required autocomplete="email" autofocus>
+            @error('email') <div class="error-text">{{ $message }}</div> @enderror
         </div>
-    </div>
-</div>
+
+        <button class="btn" type="submit">Enviar link de redefinição</button>
+
+        <div class="footer">
+            Lembrou a senha? <a class="link" href="{{ route('login') }}">Voltar para o login</a>
+        </div>
+    </form>
 @endsection

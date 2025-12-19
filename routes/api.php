@@ -3,17 +3,35 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Webhooks\EvolutionWebhookController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| Rotas da API do backend.
+| Tudo aqui já nasce com o prefixo /api (RouteServiceProvider).
 |
 */
 
+// ----------------------------------------------------------
+// Healthcheck simples
+// ----------------------------------------------------------
+Route::get('/ping', function () {
+    return response()->json(['status' => 'ok']);
+});
+
+// ----------------------------------------------------------
+// Webhook da Evolution (entrada de mensagens/eventos)
+// URL final: /api/webhooks/evolution
+// ----------------------------------------------------------
+Route::post('/webhooks/evolution', [EvolutionWebhookController::class, 'handle'])
+    ->name('webhooks.evolution');
+
+// ----------------------------------------------------------
+// Exemplo padrão (Sanctum) - mantém para compatibilidade
+// ----------------------------------------------------------
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

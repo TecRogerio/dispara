@@ -9,6 +9,10 @@
 
     <title>{{ config('app.name', 'AgendeiZap CRM') }}</title>
 
+    <!-- Tema (dark padrão do projeto) -->
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
+
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 
@@ -16,39 +20,24 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800&display=swap" rel="stylesheet">
 
-    <!-- Styles -->
+    <!-- Bootstrap/Laravel UI (mantém pra não quebrar nada existente) -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <style>
-        :root{
-            --az-bg: #0b1220;
-            --az-surface: #ffffff;
-            --az-border: rgba(15, 23, 42, .10);
-            --az-muted: rgba(15, 23, 42, .62);
-            --az-text: #0f172a;
-            --az-primary: #2563eb;
-            --az-primary-soft: rgba(37, 99, 235, .10);
-            --az-success: #16a34a;
-            --az-danger: #dc2626;
-
-            --az-radius: 16px;
-            --az-radius-sm: 12px;
-            --az-shadow: 0 10px 24px rgba(15, 23, 42, .08);
-            --az-shadow-sm: 0 6px 16px rgba(15, 23, 42, .06);
-        }
-
+        /* Mantém fonte do sistema, mas usa o tema dark do theme.css */
         body{
             font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(1200px 600px at 10% 0%, rgba(37,99,235,.10), transparent 60%),
-                        radial-gradient(900px 500px at 90% 10%, rgba(16,185,129,.08), transparent 60%),
-                        #f5f7fb;
-            color: var(--az-text);
+            background: radial-gradient(1200px 600px at 20% 10%, rgba(79,70,229,.22), transparent 60%),
+                        radial-gradient(800px 500px at 70% 80%, rgba(124,58,237,.18), transparent 60%),
+                        #060b16;
+            color: var(--text);
         }
 
-        /* Topbar */
+        /* Topbar (dark) */
         .az-topbar{
+            background: rgba(15,23,42,.55) !important;
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(15,23,42,.06);
+            border-bottom: 1px solid var(--border);
         }
         .az-brand{
             display:flex;
@@ -57,25 +46,49 @@
             text-decoration:none;
             font-weight: 900;
             letter-spacing: .2px;
-            color: var(--az-text);
+            color: var(--text);
         }
-        .az-brand:hover{ color: var(--az-text); opacity: .95; }
+        .az-brand:hover{ color: var(--text); opacity: .95; }
+
         .az-logo{
             width: 34px;
             height: 34px;
             border-radius: 12px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,.2)),
-                        linear-gradient(135deg, #2563eb, #22c55e);
-            box-shadow: 0 8px 18px rgba(37, 99, 235, .18);
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            box-shadow: 0 12px 35px rgba(79,70,229,.25);
         }
         .az-chip{
             font-size: 12px;
             font-weight: 800;
             padding: 4px 10px;
             border-radius: 999px;
-            color: #0b1220;
-            background: rgba(15,23,42,.06);
-            border: 1px solid rgba(15,23,42,.08);
+            color: var(--text);
+            background: rgba(2,6,23,.35);
+            border: 1px solid var(--border);
+        }
+
+        /* Links na navbar */
+        .navbar .nav-link{
+            color: rgba(229,231,235,.86) !important;
+        }
+        .navbar .nav-link:hover{
+            color: var(--text) !important;
+        }
+
+        /* Dropdown (Bootstrap) adaptado ao dark */
+        .dropdown-menu{
+            background: rgba(11,18,32,.95);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 16px 50px rgba(0,0,0,.35);
+        }
+        .dropdown-item{
+            color: rgba(229,231,235,.92);
+            font-weight: 700;
+        }
+        .dropdown-item:hover{
+            background: rgba(79,70,229,.10);
+            color: var(--text);
         }
 
         /* Layout com sidebar */
@@ -93,21 +106,21 @@
             min-width: 0;
         }
 
-        /* Sidebar card */
+        /* Sidebar card (dark) */
         .sidebar-card {
-            background: var(--az-surface);
-            border: 1px solid var(--az-border);
-            border-radius: var(--az-radius);
-            box-shadow: var(--az-shadow-sm);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: rgba(11,18,32,.65);
+            box-shadow: 0 16px 50px rgba(0,0,0,.25);
             padding: 14px;
             position: sticky;
-            top: 86px; /* abaixo da navbar */
+            top: 86px;
         }
 
         .sidebar-title {
             font-weight: 900;
             font-size: 12px;
-            color: rgba(15,23,42,.55);
+            color: rgba(148,163,184,.78);
             text-transform: uppercase;
             letter-spacing: .08em;
             margin: 10px 0 8px;
@@ -125,13 +138,13 @@
             width: 34px;
             height: 34px;
             border-radius: 12px;
-            background: rgba(37,99,235,.12);
-            border: 1px solid rgba(37,99,235,.18);
+            background: rgba(79,70,229,.14);
+            border: 1px solid rgba(79,70,229,.22);
             display:flex;
             align-items:center;
             justify-content:center;
             font-weight: 900;
-            color: #1d4ed8;
+            color: #c7d2fe;
             user-select:none;
         }
 
@@ -142,21 +155,21 @@
             text-decoration: none;
             padding: 10px 12px;
             border-radius: 12px;
-            color: var(--az-text);
+            color: rgba(229,231,235,.92);
             font-weight: 800;
             border: 1px solid transparent;
             transition: all .15s ease;
         }
         .sidebar-link:hover {
-            background: var(--az-primary-soft);
-            color: var(--az-primary);
-            border-color: rgba(37,99,235,.18);
+            background: rgba(79,70,229,.10);
+            color: #e0e7ff;
+            border-color: rgba(79,70,229,.22);
             transform: translateY(-1px);
         }
         .sidebar-link.active {
-            background: rgba(37,99,235,.12);
-            color: var(--az-primary);
-            border-color: rgba(37,99,235,.22);
+            background: rgba(79,70,229,.14);
+            color: #e0e7ff;
+            border-color: rgba(79,70,229,.28);
         }
 
         .sidebar-icon{
@@ -165,19 +178,20 @@
             display:inline-flex;
             align-items:center;
             justify-content:center;
-            opacity: .9;
+            opacity: .95;
         }
 
         .sidebar-sep {
             margin: 12px 0;
-            border-top: 1px solid rgba(15,23,42,.08);
+            border-top: 1px solid rgba(148,163,184,.16);
         }
 
-        .az-surface{
-            background: var(--az-surface);
-            border: 1px solid var(--az-border);
-            border-radius: var(--az-radius);
-            box-shadow: var(--az-shadow);
+        /* Ajuste do toggler no dark */
+        .navbar-toggler{
+            border-color: rgba(148,163,184,.25) !important;
+        }
+        .navbar-toggler-icon{
+            filter: invert(1) opacity(.85);
         }
 
         /* Responsivo */
@@ -208,7 +222,7 @@
 <div id="app">
 
     <!-- Topbar -->
-    <nav class="navbar navbar-expand-md navbar-light bg-white az-topbar shadow-sm">
+    <nav class="navbar navbar-expand-md az-topbar">
         <div class="container">
             <a class="az-brand" href="{{ url('/') }}">
                 <span class="az-logo" aria-hidden="true"></span>
@@ -279,7 +293,6 @@
                     $name = trim((string)($u->name ?? ''));
                     $initials = $name !== '' ? mb_strtoupper(mb_substr($name, 0, 1)) : 'U';
 
-                    // Regra tolerante de "admin" (troque depois por Gate/Policy quando tiver)
                     $isAdmin = false;
                     try {
                         if (isset($u->is_admin) && (int)$u->is_admin === 1) $isAdmin = true;
@@ -304,7 +317,7 @@
                                     <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                         {{ $u->name }}
                                     </div>
-                                    <div style="font-size:12px;color: rgba(15,23,42,.55); font-weight:700;">
+                                    <div style="font-size:12px;color: rgba(148,163,184,.78); font-weight:700;">
                                         Painel AgendeiZap
                                     </div>
                                 </div>
@@ -319,13 +332,19 @@
                                     <span>Campanhas</span>
                                 </a>
 
+                                {{-- NOVO: Conversas --}}
+                                <a class="sidebar-link {{ request()->routeIs('chats.*') ? 'active' : '' }}"
+                                   href="{{ route('chats.index') }}">
+                                    <span class="sidebar-icon" aria-hidden="true">💬</span>
+                                    <span>Conversas</span>
+                                </a>
+
                                 <a class="sidebar-link {{ request()->routeIs('instancias.*') ? 'active' : '' }}"
                                    href="{{ route('instancias.index') }}">
                                     <span class="sidebar-icon" aria-hidden="true">📱</span>
                                     <span>Instâncias</span>
                                 </a>
 
-                                {{-- Admin: só mostra se rota existe + usuário for admin --}}
                                 @if($hasAdminDashboardRoute && $isAdmin)
                                     <a class="sidebar-link {{ request()->routeIs('admin.*') ? 'active' : '' }}"
                                        href="{{ route('admin.dashboard') }}">
@@ -348,20 +367,24 @@
 
                             <div class="sidebar-sep"></div>
 
-                            <div style="font-size:12px;color: rgba(28, 53, 110, 0.55); font-weight:700; line-height:1.4;">
+                            <div style="font-size:12px;color: rgba(148,163,184,.78); font-weight:700; line-height:1.4;">
                                 Interface otimizada para uso rápido e responsivo.
                             </div>
 
                         </div>
                     </aside>
 
-                    <!-- Conteúdo -->
+                    <!-- Conteúdo (com padrão do panel.css) -->
                     <section class="app-content">
-                        @yield('content')
+                        <div class="panel-wrap">
+                            <div class="panel-container">
+                                @yield('content')
+                            </div>
+                        </div>
                     </section>
                 </div>
             @else
-                {{-- Visitante (login/register) sem sidebar --}}
+                {{-- Visitante sem sidebar --}}
                 @yield('content')
             @endauth
 

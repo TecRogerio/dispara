@@ -1,161 +1,171 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" style="max-width: 1100px; margin-top: 18px;">
 
-  {{-- Header --}}
-  <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
-    <div>
-      <h2 class="mb-1" style="font-weight:900; letter-spacing:.2px;">Campanhas</h2>
-      <div class="text-muted" style="font-size:13px;">
-        Gerencie suas campanhas, mensagens e disparos.
+<div class="panel-header">
+  <div>
+    <h1 class="panel-title">Campanhas</h1>
+    <p class="panel-subtitle">Gerencie suas campanhas, mensagens e disparos.</p>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <a href="{{ route('campanhas.create') }}" class="z-btn z-btn-primary">
+      + Nova campanha
+    </a>
+  </div>
+</div>
+
+@if (session('success'))
+  <div class="z-card" style="margin-bottom:14px;">
+    <div class="z-card-body">
+      <div class="z-badge z-badge-ok">✅ {{ session('success') }}</div>
+    </div>
+  </div>
+@endif
+
+@if (session('error'))
+  <div class="z-card" style="margin-bottom:14px;">
+    <div class="z-card-body">
+      <div class="z-badge z-badge-off">⛔ {{ session('error') }}</div>
+    </div>
+  </div>
+@endif
+
+{{-- Desktop/tablet: tabela --}}
+<div class="d-none d-md-block">
+  <div class="z-card">
+    <div class="z-card-header">
+      <strong>Lista de campanhas</strong>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:12px;color:var(--muted);">Total: {{ $campaigns->count() }}</span>
       </div>
     </div>
 
-    <div class="d-flex gap-2 flex-wrap">
-      <a href="{{ route('campanhas.create') }}" class="btn btn-primary fw-bold">
-        + Nova campanha
-      </a>
-    </div>
-  </div>
+    <div class="z-card-body" style="padding:0;">
+      <table class="z-table">
+        <thead>
+          <tr>
+            <th>Campanha</th>
+            <th>Status</th>
+            <th>Instância</th>
+            <th>Criada</th>
+            <th style="text-align:right;width:160px;">Ações</th>
+          </tr>
+        </thead>
 
-  {{-- Alerts --}}
-  @if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-  @endif
+        <tbody>
+        @forelse($campaigns as $c)
+          @php
+            $status = $c->status ?? 'draft';
 
-  @if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-  @endif
+            // Badge do tema (sem bootstrap)
+            $badgeClass = 'z-badge';
+            if ($status === 'running') $badgeClass .= ' z-badge-warn';
+            elseif ($status === 'finished') $badgeClass .= ' z-badge-ok';
+            elseif ($status === 'failed') $badgeClass .= ' z-badge-off';
+            elseif ($status === 'paused') $badgeClass .= ' z-badge-warn';
 
-  {{-- Desktop/tablet: tabela --}}
-  <div class="d-none d-md-block">
-    <div class="card" style="border-radius:16px; border:1px solid rgba(15,23,42,.10); box-shadow: 0 10px 24px rgba(15,23,42,.08);">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th style="padding:14px 14px;">Campanha</th>
-              <th style="padding:14px 14px;">Status</th>
-              <th style="padding:14px 14px;">Instância</th>
-              <th style="padding:14px 14px;">Criada</th>
-              <th style="padding:14px 14px; text-align:right;">Ações</th>
-            </tr>
-          </thead>
+            $instanceLabel = optional($c->instance)->label ?? optional($c->instance)->instance_name ?? '-';
+          @endphp
 
-          <tbody>
-          @forelse($campaigns as $c)
-            @php
-              $status = $c->status ?? 'draft';
+          <tr>
+            <td>
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <a href="{{ route('campanhas.show', $c->id) }}"
+                   class="link"
+                   style="font-weight:900; font-size:14px;">
+                  {{ $c->name }}
+                </a>
+                <span style="font-size:12px;color:var(--muted);">ID #{{ $c->id }}</span>
+              </div>
+            </td>
 
-              // Badge “bootstrap-friendly”
-              $badgeClass = 'bg-secondary';
-              if ($status === 'running') $badgeClass = 'bg-primary';
-              elseif ($status === 'finished') $badgeClass = 'bg-success';
-              elseif ($status === 'failed') $badgeClass = 'bg-danger';
-              elseif ($status === 'paused') $badgeClass = 'bg-warning text-dark';
+            <td>
+              <span class="{{ $badgeClass }}">{{ $status }}</span>
+            </td>
 
-              $instanceLabel = optional($c->instance)->label ?? optional($c->instance)->instance_name ?? '-';
-            @endphp
-
-            <tr>
-              <td style="padding:14px 14px;">
-                <div class="d-flex flex-column">
-                  <a href="{{ route('campanhas.show', $c->id) }}"
-                     style="font-weight:900; text-decoration:none; color:#0f172a;">
-                    {{ $c->name }}
-                  </a>
-                  <small class="text-muted">ID #{{ $c->id }}</small>
-                </div>
-              </td>
-
-              <td style="padding:14px 14px;">
-                <span class="badge {{ $badgeClass }}" style="font-weight:900; padding:6px 10px; border-radius:999px;">
-                  {{ $status }}
-                </span>
-              </td>
-
-              <td style="padding:14px 14px;">
+            <td>
+              <div style="display:flex;flex-direction:column;gap:2px;">
                 <span style="font-weight:800;">{{ $instanceLabel }}</span>
                 @if(optional($c->instance)->instance_name)
-                  <div class="text-muted" style="font-size:12px;">{{ $c->instance->instance_name }}</div>
+                  <span style="font-size:12px;color:var(--muted);">{{ $c->instance->instance_name }}</span>
                 @endif
-              </td>
+              </div>
+            </td>
 
-              <td style="padding:14px 14px;">
+            <td>
+              <div style="display:flex;flex-direction:column;gap:2px;">
                 <span style="font-weight:800;">
                   {{ optional($c->created_at)->format('d/m/Y') ?? '-' }}
                 </span>
-                <div class="text-muted" style="font-size:12px;">
+                <span style="font-size:12px;color:var(--muted);">
                   {{ optional($c->created_at)->format('H:i') ?? '' }}
-                </div>
-              </td>
+                </span>
+              </div>
+            </td>
 
-              <td style="padding:14px 14px; text-align:right;">
-                <a href="{{ route('campanhas.show', $c->id) }}" class="btn btn-outline-primary btn-sm fw-bold">
-                  Abrir
-                </a>
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="5" class="text-muted" style="padding:18px 14px;">
-                Nenhuma campanha ainda.
-              </td>
-            </tr>
-          @endforelse
-          </tbody>
-        </table>
-      </div>
+            <td style="text-align:right;">
+              <a href="{{ route('campanhas.show', $c->id) }}" class="z-btn">
+                Abrir
+              </a>
+            </td>
+          </tr>
+        @empty
+          <tr>
+            <td colspan="5" style="padding:16px 12px;color:var(--muted);">
+              Nenhuma campanha ainda.
+            </td>
+          </tr>
+        @endforelse
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
 
-  {{-- Mobile: cards --}}
-  <div class="d-md-none">
-    <div class="d-grid gap-2">
-      @forelse($campaigns as $c)
-        @php
-          $status = $c->status ?? 'draft';
-          $badgeClass = 'bg-secondary';
-          if ($status === 'running') $badgeClass = 'bg-primary';
-          elseif ($status === 'finished') $badgeClass = 'bg-success';
-          elseif ($status === 'failed') $badgeClass = 'bg-danger';
-          elseif ($status === 'paused') $badgeClass = 'bg-warning text-dark';
+{{-- Mobile: cards --}}
+<div class="d-md-none">
+  <div style="display:grid;gap:12px;">
+    @forelse($campaigns as $c)
+      @php
+        $status = $c->status ?? 'draft';
+        $badgeClass = 'z-badge';
+        if ($status === 'running') $badgeClass .= ' z-badge-warn';
+        elseif ($status === 'finished') $badgeClass .= ' z-badge-ok';
+        elseif ($status === 'failed') $badgeClass .= ' z-badge-off';
+        elseif ($status === 'paused') $badgeClass .= ' z-badge-warn';
 
-          $instanceLabel = optional($c->instance)->label ?? optional($c->instance)->instance_name ?? '-';
-        @endphp
+        $instanceLabel = optional($c->instance)->label ?? optional($c->instance)->instance_name ?? '-';
+      @endphp
 
-        <div class="card" style="border-radius:16px; border:1px solid rgba(15,23,42,.10); box-shadow: 0 10px 24px rgba(15,23,42,.06);">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-              <div style="min-width:0;">
-                <div style="font-weight:900; font-size:16px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                  {{ $c->name }}
-                </div>
-                <div class="text-muted" style="font-size:12px;">ID #{{ $c->id }}</div>
+      <div class="z-card">
+        <div class="z-card-body">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+            <div style="min-width:0;">
+              <div style="font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                {{ $c->name }}
               </div>
-              <span class="badge {{ $badgeClass }}" style="font-weight:900; padding:6px 10px; border-radius:999px;">
-                {{ $status }}
-              </span>
+              <div style="font-size:12px;color:var(--muted);">ID #{{ $c->id }}</div>
             </div>
+            <span class="{{ $badgeClass }}">{{ $status }}</span>
+          </div>
 
-            <div class="mt-2 text-muted" style="font-size:13px;">
-              <div><strong>Instância:</strong> {{ $instanceLabel }}</div>
-              <div><strong>Criada:</strong> {{ optional($c->created_at)->format('d/m/Y H:i') ?? '-' }}</div>
-            </div>
+          <div style="margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5;">
+            <div><strong style="color:rgba(229,231,235,.92);">Instância:</strong> {{ $instanceLabel }}</div>
+            <div><strong style="color:rgba(229,231,235,.92);">Criada:</strong> {{ optional($c->created_at)->format('d/m/Y H:i') ?? '-' }}</div>
+          </div>
 
-            <div class="mt-3 d-grid">
-              <a href="{{ route('campanhas.show', $c->id) }}" class="btn btn-outline-primary fw-bold">
-                Abrir campanha
-              </a>
-            </div>
+          <div style="margin-top:12px;">
+            <a href="{{ route('campanhas.show', $c->id) }}" class="z-btn" style="width:100%;justify-content:center;">
+              Abrir campanha
+            </a>
           </div>
         </div>
-      @empty
-        <div class="text-muted">Nenhuma campanha ainda.</div>
-      @endforelse
-    </div>
+      </div>
+    @empty
+      <div style="color:var(--muted);">Nenhuma campanha ainda.</div>
+    @endforelse
   </div>
-
 </div>
+
 @endsection
