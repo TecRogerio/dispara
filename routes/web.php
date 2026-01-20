@@ -14,11 +14,6 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Webhooks\EvolutionWebhookController;
 use App\Services\EvolutionService;
 
-/*
-|--------------------------------------------------------------------------
-| Home / Auth
-|--------------------------------------------------------------------------
-*/
 Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('campanhas.index')
@@ -31,69 +26,35 @@ Route::get('/home', function () {
     return redirect()->route('campanhas.index');
 })->name('home');
 
-/*
-|--------------------------------------------------------------------------
-| Webhook Evolution -> CRM (PUBLIC)
-|--------------------------------------------------------------------------
-*/
 Route::post('/webhooks/evolution', [EvolutionWebhookController::class, 'handle'])
     ->name('webhooks.evolution')
     ->middleware('throttle:120,1');
 
-/*
-|--------------------------------------------------------------------------
-| App (AUTH)
-|--------------------------------------------------------------------------
-*/
 Route::middleware('auth')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Admin
-    |--------------------------------------------------------------------------
-    */
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/users/{user}/instances', [DashboardController::class, 'userInstances'])->name('user.instances');
         Route::get('/instances/{instance}/events', [DashboardController::class, 'instanceEvents'])->name('instance.events');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Instâncias (WhatsApp / Evolution)
-    |--------------------------------------------------------------------------
-    */
+    // Instâncias
     Route::get('/instancias', [WhatsappInstanceController::class, 'index'])->name('instancias.index');
     Route::get('/instancias/nova', [WhatsappInstanceController::class, 'create'])->name('instancias.create');
     Route::post('/instancias', [WhatsappInstanceController::class, 'store'])->name('instancias.store');
 
-    Route::get('/instancias/{id}/status', [WhatsappInstanceController::class, 'status'])
-        ->name('instancias.status');
+    Route::get('/instancias/{id}/status', [WhatsappInstanceController::class, 'status'])->name('instancias.status');
 
-    // ✅ Settings (Comportamento) - NOVO
-    Route::get('/instancias/{id}/settings', [WhatsappInstanceController::class, 'getSettings'])
-        ->name('instancias.settings.get');
+    Route::get('/instancias/{id}/settings', [WhatsappInstanceController::class, 'getSettings'])->name('instancias.settings.get');
+    Route::post('/instancias/{id}/settings', [WhatsappInstanceController::class, 'setSettings'])->name('instancias.settings.set');
 
-    Route::post('/instancias/{id}/settings', [WhatsappInstanceController::class, 'setSettings'])
-        ->name('instancias.settings.set');
+    Route::post('/instancias/{id}/connect', [WhatsappInstanceController::class, 'connect'])->name('instancias.connect');
+    Route::post('/instancias/{id}/disconnect', [WhatsappInstanceController::class, 'disconnect'])->name('instancias.disconnect');
+    Route::post('/instancias/{id}/toggle', [WhatsappInstanceController::class, 'toggle'])->name('instancias.toggle');
 
-    Route::post('/instancias/{id}/connect', [WhatsappInstanceController::class, 'connect'])
-        ->name('instancias.connect');
+    Route::delete('/instancias/{id}', [WhatsappInstanceController::class, 'destroy'])->name('instancias.destroy');
 
-    Route::post('/instancias/{id}/disconnect', [WhatsappInstanceController::class, 'disconnect'])
-        ->name('instancias.disconnect');
-
-    Route::post('/instancias/{id}/toggle', [WhatsappInstanceController::class, 'toggle'])
-        ->name('instancias.toggle');
-
-    Route::delete('/instancias/{id}', [WhatsappInstanceController::class, 'destroy'])
-        ->name('instancias.destroy');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Campanhas
-    |--------------------------------------------------------------------------
-    */
+    // Campanhas
     Route::get('/campanhas', [CampaignController::class, 'index'])->name('campanhas.index');
     Route::get('/campanhas/nova', [CampaignController::class, 'create'])->name('campanhas.create');
     Route::post('/campanhas', [CampaignController::class, 'store'])->name('campanhas.store');
@@ -109,56 +70,38 @@ Route::middleware('auth')->group(function () {
     Route::delete('/campanhas/{id}/mensagens/{messageId}', [CampaignController::class, 'destroyMessage'])
         ->name('campanhas.messages.destroy');
 
+    // Disparo manual
     Route::post('/campanhas/{id}/disparar', [CampaignController::class, 'dispatchCampaign'])
         ->name('campanhas.dispatch');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Destinatários
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/campanhas/{campaign}/destinatarios', [CampaignRecipientController::class, 'index'])
-        ->name('campaigns.recipients.index');
+    // Disparo automático + status (AJAX)
+    Route::post('/campanhas/{id}/disparar/auto', [CampaignController::class, 'dispatchCampaignAuto'])
+        ->name('campanhas.dispatch.auto');
 
+    Route::get('/campanhas/{id}/disparar/status', [CampaignController::class, 'dispatchStatus'])
+        ->name('campanhas.dispatch.status');
+
+    // Destinatários
     Route::get('/campanhas/{campaign}/destinatarios/listar', [CampaignRecipientController::class, 'index'])
         ->name('campanhas.recipients');
-
-    Route::delete('/campanhas/{campaign}/destinatarios/{recipient}', [CampaignRecipientController::class, 'destroy'])
-        ->name('campaigns.recipients.destroy');
 
     Route::delete('/campanhas/{campaign}/destinatarios/{recipient}/remover', [CampaignRecipientController::class, 'destroy'])
         ->name('campanhas.recipients.destroy');
 
-    Route::post('/campanhas/{campaign}/destinatarios/dedup', [CampaignRecipientController::class, 'dedup'])
-        ->name('campaigns.recipients.dedup');
-
     Route::post('/campanhas/{campaign}/destinatarios/dedup/rodar', [CampaignRecipientController::class, 'dedup'])
         ->name('campanhas.recipients.dedup');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Conversas (Chat)
-    |--------------------------------------------------------------------------
-    */
+    // Conversas
     Route::get('/conversas', [ChatController::class, 'index'])->name('chats.index');
     Route::get('/conversas/{chat}', [ChatController::class, 'show'])->name('chats.show');
     Route::post('/conversas/{chat}/mensagens', [ChatController::class, 'send'])->name('chats.send');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Ping (PUBLIC)
-|--------------------------------------------------------------------------
-*/
+// Ping (public)
 Route::get('/evolution/ping', function (EvolutionService $evo) {
     return response()->json($evo->ping());
 });
 
-/*
-|--------------------------------------------------------------------------
-| Debug local (LOCAL)
-|--------------------------------------------------------------------------
-*/
 if (app()->environment('local')) {
 
     Route::get('/debug-evo', function () {

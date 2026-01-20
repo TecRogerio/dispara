@@ -9,22 +9,23 @@
 
     <title>{{ config('app.name', 'AgendeiZap CRM') }}</title>
 
-    <!-- Tema (dark padrão do projeto) -->
+    <!-- Bootstrap/Laravel UI (base) -->
+    {{-- Mix: garante cache-busting e caminho correto --}}
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+
+    <!-- Tema (dark padrão do projeto) - vem depois para sobrescrever o bootstrap -->
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/panel.css') }}">
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    {{-- Mix: garante cache-busting e caminho correto --}}
+    <script src="{{ mix('js/app.js') }}" defer></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap/Laravel UI (mantém pra não quebrar nada existente) -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
     <style>
-        /* Mantém fonte do sistema, mas usa o tema dark do theme.css */
         body{
             font-family: Nunito, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
             background: radial-gradient(1200px 600px at 20% 10%, rgba(79,70,229,.22), transparent 60%),
@@ -33,7 +34,6 @@
             color: var(--text);
         }
 
-        /* Topbar (dark) */
         .az-topbar{
             background: rgba(15,23,42,.55) !important;
             backdrop-filter: blur(10px);
@@ -67,7 +67,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Links na navbar */
         .navbar .nav-link{
             color: rgba(229,231,235,.86) !important;
         }
@@ -75,7 +74,6 @@
             color: var(--text) !important;
         }
 
-        /* Dropdown (Bootstrap) adaptado ao dark */
         .dropdown-menu{
             background: rgba(11,18,32,.95);
             border: 1px solid var(--border);
@@ -91,7 +89,6 @@
             color: var(--text);
         }
 
-        /* Layout com sidebar */
         .app-shell {
             display: flex;
             gap: 18px;
@@ -106,7 +103,6 @@
             min-width: 0;
         }
 
-        /* Sidebar card (dark) */
         .sidebar-card {
             border: 1px solid var(--border);
             border-radius: 16px;
@@ -186,7 +182,6 @@
             border-top: 1px solid rgba(148,163,184,.16);
         }
 
-        /* Ajuste do toggler no dark */
         .navbar-toggler{
             border-color: rgba(148,163,184,.25) !important;
         }
@@ -194,7 +189,6 @@
             filter: invert(1) opacity(.85);
         }
 
-        /* Responsivo */
         @media (max-width: 992px) {
             main.py-4{ padding-top: 14px !important; }
             .app-shell { flex-direction: column; }
@@ -332,7 +326,6 @@
                                     <span>Campanhas</span>
                                 </a>
 
-                                {{-- NOVO: Conversas --}}
                                 <a class="sidebar-link {{ request()->routeIs('chats.*') ? 'active' : '' }}"
                                    href="{{ route('chats.index') }}">
                                     <span class="sidebar-icon" aria-hidden="true">💬</span>
@@ -374,7 +367,6 @@
                         </div>
                     </aside>
 
-                    <!-- Conteúdo (com padrão do panel.css) -->
                     <section class="app-content">
                         <div class="panel-wrap">
                             <div class="panel-container">
@@ -384,7 +376,6 @@
                     </section>
                 </div>
             @else
-                {{-- Visitante sem sidebar --}}
                 @yield('content')
             @endauth
 
@@ -392,5 +383,9 @@
     </main>
 
 </div>
+
+{{-- ✅ IMPORTANTÍSSIMO para o @push('scripts') funcionar --}}
+@stack('scripts')
+
 </body>
 </html>

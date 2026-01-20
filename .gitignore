@@ -16,3 +16,5 @@ Homestead.yaml
 .vscode
 .DS_Store
 Thumbs.db
+
+*.zip
